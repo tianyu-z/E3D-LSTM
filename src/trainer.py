@@ -178,8 +178,11 @@ class TaxiBJTrainer(nn.Module):
                 self.comet_exp = None
             self.ckpt_dict = torch.load(self.args.checkpoint)
             self.load_state_dict(self.ckpt_dict["state_dict"])
+            self.to(self.device)
             params = self.parameters(recurse=True)
-            self.optimizer = torch.optim.Adam(params, lr=1e-3, weight_decay=0)
+            self.optimizer = torch.optim.Adam(
+                params, lr=self.args.init_learning_rate, weight_decay=0
+            )
             self.optimizer.load_state_dict(self.ckpt_dict["opt_state_dict"])
             self.scheduler = torch.optim.lr_scheduler.MultiStepLR(
                 self.optimizer, milestones=self.args.milestones, gamma=0.1
@@ -202,6 +205,7 @@ class TaxiBJTrainer(nn.Module):
                 "detail": "End to end E3D",
                 "trainBatchSz": self.args.train_batch_size,
             }
+            self.to(self.device)
             params = self.parameters(recurse=True)
             self.optimizer = torch.optim.Adam(
                 params, lr=self.args.init_learning_rate, weight_decay=0
@@ -209,7 +213,6 @@ class TaxiBJTrainer(nn.Module):
             self.scheduler = torch.optim.lr_scheduler.MultiStepLR(
                 self.optimizer, milestones=self.args.milestones, gamma=0.1
             )
-        self.to(self.device)
 
         # Setup optimizer
 
